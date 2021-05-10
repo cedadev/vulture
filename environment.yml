@@ -1,0 +1,30 @@
+name: vulture
+channels:
+- conda-forge
+- defaults
+dependencies:
+- pip
+- python=3.7 # >=3.6,<3.8
+# - pywps>=4.2.9,<4.3
+- jinja2
+- click
+- psutil
+# tests
+- pytest
+- rtree>=0.9
+- cfunits
+- cftime>=1.2.1
+- udunits2>=2.2
+- xarray>=0.16
+- dask>=2.26
+- netcdf4>=1.4
+# - daops>=0.3.0,<0.4
+# - clisops>=0.4.0,<0.5
+# workflow
+- networkx
+# provenance
+- prov>=2.0.0
+- graphviz
+# tests
+- pytest
+- python-dateutil>=2.8.1

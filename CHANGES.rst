@@ -1,0 +1,24 @@
+Changes
+*******
+
+Unreleased
+==========
+* ``python-dateutil>=2.8.1`` added as a new dependency.
+
+0.2.0 (2020-11-19)
+==================
+
+Changes:
+
+* Build on cookiecutter template with ``cruft`` update.
+* Available processes: ``subset``, ``orchestrate``.
+* Using ``daops`` for subsetting operation.
+* Using a simple workflow implementation for combining operators.
+* Process outputs are provided as ``Metalink`` documents.
+* Added initial support for provenance documentation.
+
+
+0.1.0 (2020-04-03)
+==================
+
+* First release.
