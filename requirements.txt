@@ -3,7 +3,7 @@ jinja2
 click
 psutil
 networkx
-cf-checker
+cfchecker
 netcdf4
 python-dateutil>=2.8.1
 # daops>=0.3.0

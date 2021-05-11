@@ -1,5 +1,5 @@
-from .wps_subset_cru_ts import SubsetCRUTS
+from .wps_cf_check import CFCheck
 
 processes = [
-    SubsetCRUTS(),
+    CFCheck(),
 ]
