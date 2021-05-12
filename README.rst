@@ -5,11 +5,7 @@ vulture
    :target: https://vulture-wps.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-.. image:: https://travis-ci.org/roocs/vulture.svg?branch=master
-   :target: https://travis-ci.org/roocs/vulture
-   :alt: Travis Build
-
-.. image:: https://img.shields.io/github/license/roocs/vulture.svg
+.. image:: https://img.shields.io/github/license/cedadev/vulture.svg
     :target: https://github.com/cedadev/vulture/blob/master/LICENSE.txt
     :alt: GitHub license
 

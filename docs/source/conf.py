@@ -89,7 +89,6 @@ autodoc_mock_imports = [
     "scikit-learn",
     "cairo",
     "networkx",
-    "roocs_utils",
     "daops",
 ]
 
@@ -243,7 +242,7 @@ texinfo_documents = [
         "vulture Documentation",
         author,
         "vulture",
-        "A WPS service for roocs.",
+        "A WPS service for compliance-checking.",
         "Miscellaneous",
     ),
 ]

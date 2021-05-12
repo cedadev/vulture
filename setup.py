@@ -38,7 +38,7 @@ classifiers = [
 setup(
     name="vulture",
     version=about["__version__"],
-    description="A WPS service for roocs.",
+    description="A WPS service for compliance-checking.",
     long_description=README + "\n\n" + CHANGES,
     long_description_content_type="text/x-rst",
     author=about["__author__"],

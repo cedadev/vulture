@@ -27,7 +27,7 @@ EXPOSE 5000
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ["source activate wps && exec vulture start -b 0.0.0.0 -c /opt/wps/etc/demo.cfg"]
 
-# docker build -t roocs/vulture .
-# docker run -p 5000:5000 roocs/vulture
+# docker build -t cedadev/vulture .
+# docker run -p 5000:5000 cedadev/vulture
 # http://localhost:5000/wps?request=GetCapabilities&service=WPS
 # http://localhost:5000/wps?request=DescribeProcess&service=WPS&identifier=all&version=1.0.0

@@ -17,3 +17,4 @@ dependencies:
 - netcdf4>=1.4
 # tests
 - pytest
+- GitPython
