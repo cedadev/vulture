@@ -9,6 +9,7 @@ from cfchecker import cfchecks
 from pywps import LiteralInput, Process, FORMATS, Format, ComplexOutput
 from pywps.app.Common import Metadata
 from pywps.app.exceptions import ProcessError
+from pywps import configuration
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
@@ -80,6 +81,12 @@ class CFCheck(Process):
             status_supported=True
         )
 
+    def _get_input(self, inputs, key, default=None):
+        if key in inputs:
+            return inputs[key][0].data
+
+        return default
+
     def _download_file(self, url):
         response = requests.get(url)
         downloaded_file = response.content
@@ -94,11 +101,16 @@ class CFCheck(Process):
 
         return fpath
 
-    def _get_input(self, inputs, key, default=None):
-        if key in inputs:
-            return inputs[key][0].data
+    def _map_url_to_path(self, url):
+        """
+        Takes a URL (from the UI/client server) and maps the path to the local
+        file system. Returns that path.
+        """
+        cache_dir = configuration.get_config_value("server", "shared_cache_dir")
+        if cache_dir not in url:
+            raise ProcessError('Could not access uploaded file via shared cache.')
 
-        return default
+        return os.path.join(cache_dir, url.split(cache_dir)[-1].lstrip('/'))
 
     def _get_nc_path(self, inputs):
         """
@@ -114,7 +126,7 @@ class CFCheck(Process):
             nc_path = self._download_file(nc_url)
 
         elif nc_file_upload:
-            nc_path = nc_file_upload
+            nc_path = self._map_url_to_path(nc_file_upload)
 
         elif nc_file_path:
             nc_path = nc_file_path
