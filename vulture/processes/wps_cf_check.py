@@ -18,7 +18,7 @@ class CFCheck(Process):
     def __init__(self):
         inputs = [
             LiteralInput(
-                "cf_version",
+                "CFVersion",
                 "CF Version",
                 abstract=("Version of the CF Conventions that the NetCDF file should be checked against. "
                           "E.g.: auto, 1.6, 1.7, 1.8."),
@@ -28,7 +28,7 @@ class CFCheck(Process):
                 max_occurs=1
             ),
             LiteralInput(
-                "nc_file_url",
+                "NCFileURL",
                 "NC File URL",
                 abstract="URL to a NetCDF file accessible via the internet.",
                 data_type="string",
@@ -36,7 +36,7 @@ class CFCheck(Process):
                 max_occurs=1
             ),
             LiteralInput(
-                "nc_file_upload",
+                "NCFileUpload",
                 "NC File Upload",
                 abstract="You may upload a NetCDF file to this service using this loader.",
                 data_type="string",
@@ -44,7 +44,7 @@ class CFCheck(Process):
                 max_occurs=1
             ),
             LiteralInput(
-                "nc_file_path",
+                "NCFilePath",
                 "NC File Path",
                 abstract="A file path pointing to a NetCDF file on the server.",
                 data_type="string",
@@ -84,11 +84,7 @@ class CFCheck(Process):
         response = requests.get(url)
         downloaded_file = response.content
 
-        fname = os.path.split(nc_url)[1]
-        if not fname:
-            fname = "testfile.nc"
-
-        fpath = os.path.join(self.workdir, fname)
+        fpath = os.path.join(self.workdir, 'testfile.nc')
 
         if response.status_code == 200:
             with open(fpath, 'wb') as f:
@@ -109,13 +105,13 @@ class CFCheck(Process):
         Parse the inputs to decide which file to check, return the local path to it.
         """
         # If URL provided, then use that
-        nc_url = self._get_input(inputs, "nc_file_url")
-        nc_file_upload = self._get_input(inputs, "nc_file_upload")
-        nc_file_path = self._get_input(inputs, "nc_file_path")
+        nc_url = self._get_input(inputs, "NCFileURL")
+        nc_file_upload = self._get_input(inputs, "NCFileUpload")
+        nc_file_path = self._get_input(inputs, "NCFilePath")
 
         if nc_url:
             # Use downloaded file
-            nc_path = self._download_file(url)
+            nc_path = self._download_file(nc_url)
 
         elif nc_file_upload:
             nc_path = nc_file_upload
@@ -124,8 +120,8 @@ class CFCheck(Process):
             nc_path = nc_file_path
 
         else:
-            raise ProcessError(("User must provide one input from: nc_file_url, "
-                                "nc_file_upload or nc_file_path."))
+            raise ProcessError(("User must provide one input from: NCFileURL, "
+                                "NCFileUpload or NCFilePath."))
 
         return nc_path
 
@@ -134,7 +130,7 @@ class CFCheck(Process):
         Use the user input and/or the file version to decide the Conventions
         version to test the file against.
         """
-        convention_version = self._get_input(inputs, "cf_version", "auto")
+        convention_version = self._get_input(inputs, "CFVersion", "auto")
         AUTO = 'auto'
 
         if convention_version == AUTO:
@@ -161,7 +157,10 @@ class CFCheck(Process):
         nc_path = self._get_nc_path(request.inputs)
 
         # Get the CF version to use
-        conventions_version = self._resolve_conventions_version(request.inputs, nc_path)
+        try:
+            conventions_version = self._resolve_conventions_version(request.inputs, nc_path)
+        except Exception:
+            raise ProcessError('Cannot read NetCDF file')
 
         # Set output file
         output_file = os.path.join(self.workdir, 'cfchecker_output.txt')
@@ -176,9 +175,12 @@ class CFCheck(Process):
         tmp_stdout = sys.stdout
         sys.stdout = Stdout()
 
-        checker = cfchecks.CFChecker(cfStandardNamesXML=cfchecks.STANDARDNAME,
-                                     cfAreaTypesXML=cfchecks.AREATYPES,
-                                     version=conventions_version)
+        try:
+            checker = cfchecks.CFChecker(cfStandardNamesXML=cfchecks.STANDARDNAME,
+                                         cfAreaTypesXML=cfchecks.AREATYPES,
+                                         version=conventions_version)
+        except Exception:
+            raise ProcessError('Could not run CF-Checker on input file') 
 
         rc = checker.checker(nc_path)
         output = sys.stdout.data

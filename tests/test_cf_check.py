@@ -13,18 +13,72 @@ TEST_FILES = [
     os.path.join(MINI_CEDA_CACHE_DIR, 'main/archive/badc/cru/data/cru_ts/cru_ts_4.04/data/tmp/cru_ts4.04.1901.2019.tmp.dat.nc')
 ]
 
+BAD_FILE = os.path.join(MINI_CEDA_CACHE_DIR, 'main/archive/badc/ukmo-midas/data/TD/yearly_files/midas_tmpdrnl_201901-201912.txt')
 
-def test_cf_check(load_ceda_test_data):
+TEST_URLS = [
+    'https://www.unidata.ucar.edu/software/netcdf/examples/tos_O1_2001-2002.nc'
+]
+
+
+def test_cf_check_NCFilePath_success(load_ceda_test_data):
     client = client_for(Service(processes=[CFCheck()], cfgfiles=[PYWPS_CFG]))
     nc_path = TEST_FILES[0]
 
-    datainputs = f"cf_version=auto;nc_file_path={nc_path}"
+    datainputs = f"cf_version=auto;NCFilePath={nc_path}"
     resp = client.get(
         f"?service=WPS&request=Execute&version=1.0.0&identifier=CFCheck&datainputs={datainputs}"
     )
     assert_response_success(resp)
 
-    output_file = get_output(resp.xml)["output"][7:] #trim off 'file://'
+    output_file = get_output(resp.xml)["output"][7:] # trims off 'file://'
+    output = open(output_file).read()
+
+    assert output.startswith('CHECKING NetCDF FILE:')
+    assert 'Checking variable: lat' in output
+    assert "INFO: Invalid Type for attribute: _FillValue <class 'numpy.float32'>" in output
+    assert 'ERRORS detected: 0' in output
+    assert 'WARNINGS given: 0'
+    assert 'INFORMATION messages: 2'
+
+
+def test_cf_check_NCFilePath_fail_no_file():
+    client = client_for(Service(processes=[CFCheck()], cfgfiles=[PYWPS_CFG]))
+
+    datainputs = f"cf_version=auto;NCFilePath=RUBBISH"
+
+    resp = client.get(
+        f"?service=WPS&request=Execute&version=1.0.0&identifier=CFCheck&datainputs={datainputs}"
+    )
+
+    resp_str = resp.response[0].decode('utf-8')
+    assert "Process error: Cannot read NetCDF file" in resp_str
+    assert "ExceptionReport" in resp_str
+
+
+def test_cf_check_NCFilePath_fail_bad_file():
+    client = client_for(Service(processes=[CFCheck()], cfgfiles=[PYWPS_CFG]))
+
+    datainputs = f"cf_version=auto;NCFilePath={BAD_FILE}"
+
+    resp = client.get(
+        f"?service=WPS&request=Execute&version=1.0.0&identifier=CFCheck&datainputs={datainputs}"
+    )
+
+    resp_str = resp.response[0].decode('utf-8')
+    assert "Process error: Cannot read NetCDF file" in resp_str
+
+
+def test_cf_check_NCFileUpload_success():
+    client = client_for(Service(processes=[CFCheck()], cfgfiles=[PYWPS_CFG]))
+    nc_url = TEST_URLS[0]
+
+    datainputs = f"cf_version=auto;NCFileURL={nc_url}"
+    resp = client.get(
+        f"?service=WPS&request=Execute&version=1.0.0&identifier=CFCheck&datainputs={datainputs}"
+    )
+    assert_response_success(resp)
+
+    output_file = get_output(resp.xml)["output"][7:] # trims off 'file://'
     output = open(output_file).read()
 
     assert output.startswith('CHECKING NetCDF FILE:')
