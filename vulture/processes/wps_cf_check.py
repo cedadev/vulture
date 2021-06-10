@@ -23,6 +23,7 @@ class CFCheck(Process):
                 "CF Version",
                 abstract=("Version of the CF Conventions that the NetCDF file should be checked against. "
                           "E.g.: auto, 1.6, 1.7, 1.8."),
+                allowed_values=["auto", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.8"],
                 data_type="string",
                 default="auto",
                 min_occurs=1,
