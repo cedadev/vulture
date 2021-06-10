@@ -5,16 +5,10 @@ channels:
 dependencies:
 - pip
 - python=3.8
-- pywps>=4.2.9,<4.3
 - jinja2
 - click
 - psutil
 - rtree>=0.9
 - cfunits
 - cftime>=1.2.1
-- cfchecker
 - udunits2>=2.2
-- netcdf4>=1.4
-# tests
-- pytest
-- GitPython

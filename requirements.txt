@@ -1,7 +1,7 @@
-pywps>=4.2.9,<4.3
-jinja2
-click
-psutil
 cfchecker
-netcdf4
+click
+jinja2
+owslib
+psutil
 python-dateutil>=2.8.1
+pywps
