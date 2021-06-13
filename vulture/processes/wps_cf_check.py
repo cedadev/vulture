@@ -1,6 +1,7 @@
 import requests
 import os
 import sys
+import re
 
 from netCDF4 import Dataset
 
@@ -157,8 +158,11 @@ class CFCheck(Process):
             conv = getattr(ds, 'Conventions', AUTO)
             ds.close()
 
-            if conv:
-                version = cfchecks.CFVersion(conv)
+            # Extract only the CF-relevant part of any compound conventions
+            cf_conv = [c.strip() for c in re.split('[,;]', conv) if c.strip().startswith('CF')][0]
+
+            if cf_conv:
+                version = cfchecks.CFVersion(cf_conv)
             else:
                 version = cfchecks.newest_version
         else:
