@@ -51,7 +51,7 @@ def test_cf_check_NCFilePath_fail_no_file():
     )
 
     resp_str = resp.response[0].decode('utf-8')
-    assert "Process error: Cannot read NetCDF file" in resp_str
+    assert "Process error: Could not run CF-Checker on input file" in resp_str
     assert "ExceptionReport" in resp_str
 
 
@@ -65,7 +65,7 @@ def test_cf_check_NCFilePath_fail_bad_file():
     )
 
     resp_str = resp.response[0].decode('utf-8')
-    assert "Process error: Cannot read NetCDF file" in resp_str
+    assert "Process error: Could not run CF-Checker on input file" in resp_str
 
 
 def test_cf_check_NCFileUpload_success():

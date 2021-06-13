@@ -1,9 +1,6 @@
 import requests
 import os
 import sys
-import re
-
-from netCDF4 import Dataset
 
 from cfchecker import cfchecks
 
@@ -11,6 +8,8 @@ from pywps import LiteralInput, Process, FORMATS, Format, ComplexOutput
 from pywps.app.Common import Metadata
 from pywps.app.exceptions import ProcessError
 from pywps import configuration
+
+from ..utils import get_input, resolve_conventions_version
 
 import logging
 LOGGER = logging.getLogger("PYWPS")
@@ -83,12 +82,6 @@ class CFCheck(Process):
             status_supported=True
         )
 
-    def _get_input(self, inputs, key, default=None):
-        if key in inputs:
-            return inputs[key][0].data
-
-        return default
-
     def _download_file(self, url):
         response = requests.get(url)
         downloaded_file = response.content
@@ -124,9 +117,9 @@ class CFCheck(Process):
         Parse the inputs to decide which file to check, return the local path to it.
         """
         # If URL provided, then use that
-        nc_url = self._get_input(inputs, "NCFileURL")
-        nc_file_upload = self._get_input(inputs, "NCFileUpload")
-        nc_file_path = self._get_input(inputs, "NCFilePath")
+        nc_url = get_input(inputs, "NCFileURL")
+        nc_file_upload = get_input(inputs, "NCFileUpload")
+        nc_file_path = get_input(inputs, "NCFilePath")
 
         if nc_url:
             # Use downloaded file
@@ -139,36 +132,10 @@ class CFCheck(Process):
             nc_path = nc_file_path
 
         else:
-            raise ProcessError(("User must provide one input from: NCFileURL, "
-                                "NCFileUpload or NCFilePath."))
+            raise Exception()
 
         LOGGER.info(f"NetCDF file to cf-check: {nc_path}")
         return nc_path
-
-    def _resolve_conventions_version(self, inputs, nc_path):
-        """
-        Use the user input and/or the file version to decide the Conventions
-        version to test the file against.
-        """
-        convention_version = self._get_input(inputs, "CFVersion", "auto")
-        AUTO = 'auto'
-
-        if convention_version == AUTO:
-            ds = Dataset(nc_path)
-            conv = getattr(ds, 'Conventions', AUTO)
-            ds.close()
-
-            # Extract only the CF-relevant part of any compound conventions
-            cf_conv = [c.strip() for c in re.split('[,;]', conv) if c.strip().startswith('CF')][0]
-
-            if cf_conv:
-                version = cfchecks.CFVersion(cf_conv)
-            else:
-                version = cfchecks.newest_version
-        else:
-            version = cfchecks.CFVersion(convention_version)
-
-        return version
 
     def _handler(self, request, response):
         """
@@ -177,11 +144,15 @@ class CFCheck(Process):
         response.update_status('Job is now running', 0)
 
         # Determine the NetCDF file to check
-        nc_path = self._get_nc_path(request.inputs)
+        try:
+            nc_path = self._get_nc_path(request.inputs)
+        except Exception:
+            raise ProcessError(("User must provide one input from: NCFileURL, "
+                                "NCFileUpload or NCFilePath."))
 
         # Get the CF version to use
         try:
-            conventions_version = self._resolve_conventions_version(request.inputs, nc_path)
+            conventions_version = resolve_conventions_version(request.inputs, nc_path)
         except Exception:
             raise ProcessError('Cannot read NetCDF file')
 
@@ -202,10 +173,10 @@ class CFCheck(Process):
             checker = cfchecks.CFChecker(cfStandardNamesXML=cfchecks.STANDARDNAME,
                                          cfAreaTypesXML=cfchecks.AREATYPES,
                                          version=conventions_version)
+            rc = checker.checker(nc_path)
         except Exception:
             raise ProcessError('Could not run CF-Checker on input file') 
 
-        rc = checker.checker(nc_path)
         output = sys.stdout.data
 
         # Put standard output back in the right place
