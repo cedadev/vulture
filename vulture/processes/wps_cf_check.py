@@ -107,6 +107,11 @@ class CFCheck(Process):
         Takes a URL (from the UI/client server) and maps the path to the local
         file system. Returns that path.
         """
+        # If the client sent a local file path, just use that
+        if os.path.isfile(url):
+            return url
+
+        # If a URL was sent, then map that to a cache dir
         cache_dir = configuration.get_config_value("server", "shared_cache_dir")
         if cache_dir not in url:
             raise ProcessError('Could not access uploaded file via shared cache.')
@@ -136,6 +141,7 @@ class CFCheck(Process):
             raise ProcessError(("User must provide one input from: NCFileURL, "
                                 "NCFileUpload or NCFilePath."))
 
+        LOGGER.info(f"NetCDF file to cf-check: {nc_path}")
         return nc_path
 
     def _resolve_conventions_version(self, inputs, nc_path):
