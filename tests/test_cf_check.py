@@ -35,10 +35,9 @@ def test_cf_check_NCFilePath_success(load_ceda_test_data):
 
     assert output.startswith('CHECKING NetCDF FILE:')
     assert 'Checking variable: lat' in output
-    assert "INFO: Invalid Type for attribute: _FillValue <class 'numpy.float32'>" in output
     assert 'ERRORS detected: 0' in output
-    assert 'WARNINGS given: 0'
-    assert 'INFORMATION messages: 2'
+    assert 'WARNINGS given: 1'
+    assert 'INFORMATION messages: 0'
 
 
 def test_cf_check_NCFilePath_fail_no_file():
@@ -83,8 +82,7 @@ def test_cf_check_NCFileUpload_success():
 
     assert output.startswith('CHECKING NetCDF FILE:')
     assert 'Checking variable: lat' in output
-    assert "INFO: Invalid Type for attribute: _FillValue <class 'numpy.float32'>" in output
     assert 'ERRORS detected: 0' in output
-    assert 'WARNINGS given: 0'
-    assert 'INFORMATION messages: 2'
+    assert 'WARNINGS given: 1'
+    assert 'INFORMATION messages: 0'
 

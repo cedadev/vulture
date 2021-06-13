@@ -22,11 +22,11 @@ def _dummy(value):
 def test_resolve_conventions_version(load_ceda_test_data):
     inputs = _dummy("auto")
     res = resolve_conventions_version(inputs, None)
-    assert res.tuple == (1, 7)
+    assert res.tuple == (1, 8)
 
     inputs = _dummy("rubbish")
     res = resolve_conventions_version(inputs, None)
-    assert res.tuple == (1, 7)
+    assert res.tuple == (1, 8)
 
     inputs = _dummy("auto")
     res = resolve_conventions_version(inputs, TEST_FILE)
