@@ -1,4 +1,4 @@
-cfchecker
+cfchecker==4.1.0
 click
 jinja2
 owslib

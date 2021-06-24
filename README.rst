@@ -6,7 +6,7 @@ vulture
    :alt: Documentation Status
 
 .. image:: https://img.shields.io/github/license/cedadev/vulture.svg
-    :target: https://github.com/cedadev/vulture/blob/master/LICENSE.txt
+    :target: https://github.com/cedadev/vulture/blob/main/LICENSE.txt
     :alt: GitHub license
 
 

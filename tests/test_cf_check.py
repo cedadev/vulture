@@ -20,11 +20,11 @@ TEST_URLS = [
 ]
 
 
-def test_cf_check_NCFilePath_success(load_ceda_test_data):
+def test_cf_check_NetCDFFilePath_success(load_ceda_test_data):
     client = client_for(Service(processes=[CFCheck()], cfgfiles=[PYWPS_CFG]))
     nc_path = TEST_FILES[0]
 
-    datainputs = f"cf_version=auto;NCFilePath={nc_path}"
+    datainputs = f"cf_version=auto;NetCDFFilePath={nc_path}"
     resp = client.get(
         f"?service=WPS&request=Execute&version=1.0.0&identifier=CFCheck&datainputs={datainputs}"
     )
@@ -40,10 +40,10 @@ def test_cf_check_NCFilePath_success(load_ceda_test_data):
     assert 'INFORMATION messages: 0'
 
 
-def test_cf_check_NCFilePath_fail_no_file():
+def test_cf_check_NetCDFFilePath_fail_no_file():
     client = client_for(Service(processes=[CFCheck()], cfgfiles=[PYWPS_CFG]))
 
-    datainputs = f"cf_version=auto;NCFilePath=RUBBISH"
+    datainputs = f"cf_version=auto;NetCDFFilePath=RUBBISH"
 
     resp = client.get(
         f"?service=WPS&request=Execute&version=1.0.0&identifier=CFCheck&datainputs={datainputs}"
@@ -54,10 +54,10 @@ def test_cf_check_NCFilePath_fail_no_file():
     assert "ExceptionReport" in resp_str
 
 
-def test_cf_check_NCFilePath_fail_bad_file():
+def test_cf_check_NetCDFFilePath_fail_bad_file():
     client = client_for(Service(processes=[CFCheck()], cfgfiles=[PYWPS_CFG]))
 
-    datainputs = f"cf_version=auto;NCFilePath={BAD_FILE}"
+    datainputs = f"cf_version=auto;NetCDFFilePath={BAD_FILE}"
 
     resp = client.get(
         f"?service=WPS&request=Execute&version=1.0.0&identifier=CFCheck&datainputs={datainputs}"
@@ -67,11 +67,11 @@ def test_cf_check_NCFilePath_fail_bad_file():
     assert "Process error: Could not run CF-Checker on input file" in resp_str
 
 
-def test_cf_check_NCFileUpload_success():
+def test_cf_check_NetCDFFileUpload_success():
     client = client_for(Service(processes=[CFCheck()], cfgfiles=[PYWPS_CFG]))
     nc_url = TEST_URLS[0]
 
-    datainputs = f"cf_version=auto;NCFileURL={nc_url}"
+    datainputs = f"cf_version=auto;NetCDFFileURL={nc_url}"
     resp = client.get(
         f"?service=WPS&request=Execute&version=1.0.0&identifier=CFCheck&datainputs={datainputs}"
     )

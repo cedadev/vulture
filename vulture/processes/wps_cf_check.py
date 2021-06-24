@@ -30,25 +30,25 @@ class CFCheck(Process):
                 max_occurs=1
             ),
             LiteralInput(
-                "NCFileURL",
-                "NC File URL",
+                "NetCDFFileURL",
+                "NetCDF File URL",
                 abstract="URL to a NetCDF file accessible via the internet.",
                 data_type="string",
                 min_occurs=0,
                 max_occurs=1
             ),
             LiteralInput(
-                "NCFileUpload",
-                "NC File Upload",
+                "NetCDFFileUpload",
+                "NetCDF File Upload",
                 abstract="You may upload a NetCDF file to this service using this loader.",
                 data_type="string",
                 min_occurs=0,
                 max_occurs=1
             ),
             LiteralInput(
-                "NCFilePath",
-                "NC File Path",
-                abstract="A file path pointing to a NetCDF file on the server.",
+                "NetCDFFilePath",
+                "NetCDF File Path",
+                abstract="A file path pointing to a NetCDF file in the CEDA Archive.",
                 data_type="string",
                 min_occurs=0,
                 max_occurs=1
@@ -117,9 +117,9 @@ class CFCheck(Process):
         Parse the inputs to decide which file to check, return the local path to it.
         """
         # If URL provided, then use that
-        nc_url = get_input(inputs, "NCFileURL")
-        nc_file_upload = get_input(inputs, "NCFileUpload")
-        nc_file_path = get_input(inputs, "NCFilePath")
+        nc_url = get_input(inputs, "NetCDFFileURL")
+        nc_file_upload = get_input(inputs, "NetCDFFileUpload")
+        nc_file_path = get_input(inputs, "NetCDFFilePath")
 
         if nc_url:
             # Use downloaded file
@@ -147,8 +147,8 @@ class CFCheck(Process):
         try:
             nc_path = self._get_nc_path(request.inputs)
         except Exception:
-            raise ProcessError(("User must provide one input from: NCFileURL, "
-                                "NCFileUpload or NCFilePath."))
+            raise ProcessError(("User must provide one input from: NetCDFFileURL, "
+                                "NetCDFFileUpload or NetCDFFilePath."))
 
         # Get the CF version to use
         try:
