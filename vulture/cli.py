@@ -202,6 +202,8 @@ def start(
             wps_log_level=log_level,
             wps_log_file=log_file,
             wps_database=database,
+            wps_outputurl="http://ceda-wps-staging.ceda.ac.uk/outputs",
+            wps_outputpath="/gws/nopw/j04/ceda_wps/birds/test/outputs/vulture"
         )
     )
     if config:

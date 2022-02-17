@@ -22,7 +22,7 @@ TEST_URLS = [
 
 def test_amof_comp_check_FilePath_success(load_ceda_test_data):
     client = client_for(Service(processes=[AMOFCompCheck()], cfgfiles=[PYWPS_CFG]))
-    file_path = TEST_FILES[0]
+    file_path = "/gws/smf/j04/cedaproc/amf-example-files/ncas-anemometer-1_ral_29001225_mean-winds_v0.1.nc"
 
     datainputs = f"AMOFChecksVersion=auto;FilePath={file_path}"
     resp = client.get(

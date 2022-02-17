@@ -140,16 +140,16 @@ class AMOFCompCheck(Process):
     def _wrap_checker(self, checks_version, input_path):
         output_dir = self.workdir
 
-        TEST_FILE = "/gws/smf/j04/cedaproc/amf-example-files/ncas-anemometer-1_ral_29001225_mean-winds_v0.1.nc"
+        #input_path = "/gws/smf/j04/cedaproc/amf-example-files/ncas-anemometer-1_ral_29001225_mean-winds_v0.1.nc"
         CHECKS_VERSION = "v2.0"
         PYESSV_ARCHIVE_HOME = "/gws/smf/j04/cedaproc/amof-checker/AMF_CVs-2.0.0/pyessv-vocabs"
         CHECKS_DIR = "/gws/smf/j04/cedaproc/amof-checker/amf-compliance-checks-2.0.0/checks"
 
         cmd = "source /gws/smf/j04/cedaproc/amof-checker/setup-checks-env.sh; "
-        cmd += f"amf-checker --yaml-dir {CHECKS_DIR} --version {CHECKS_VERSION} -f text -o {output_dir} {TEST_FILE}"
+        cmd += f"amf-checker --yaml-dir {CHECKS_DIR} --version {CHECKS_VERSION} -f text -o {output_dir} {input_path}"
 
         sp.run(f'bash -c "{cmd}"', shell=True, env={"PYESSV_ARCHIVE_HOME": PYESSV_ARCHIVE_HOME, "CHECKS_DIR": CHECKS_DIR})
-        output_path = os.path.join(output_dir, os.path.basename(TEST_FILE) + ".cc-output")
+        output_path = os.path.join(output_dir, os.path.basename(input_path) + ".cc-output")
 
         new_path = os.path.join(output_dir, "check-output.txt")
         os.rename(output_path, new_path)
@@ -175,11 +175,11 @@ class AMOFCompCheck(Process):
         output_file = os.path.join(self.workdir, 'amof_checker_output.txt')
 
         # Redirect standard output so we can capture it
-        class Stdout(object):
-            def __init__(self):
-                self.data = ""
-            def write(self, data):
-                self.data += data
+#        class Stdout(object):
+#            def __init__(self):
+#                self.data = ""
+#            def write(self, data):
+#                self.data += data
 
 #        tmp_stdout = sys.stdout
 #        sys.stdout = Stdout()
