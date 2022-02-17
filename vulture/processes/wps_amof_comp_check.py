@@ -21,10 +21,10 @@ class AMOFCompCheck(Process):
         inputs = [
             LiteralInput(
                 "AMOFChecksVersion",
-                "AMOFCHecksVersion",
+                "AMOF Checks Version",
                 abstract=("Version of the AMOF Compliance Checks that the file should be checked against. "
                           "E.g.: auto, 2.0."),
-                allowed_values=["auto", "2.0"],
+                allowed_values=["auto"] + self.supported_checks_versions,
                 data_type="string",
                 default="auto",
                 min_occurs=1,
@@ -117,19 +117,19 @@ class AMOFCompCheck(Process):
         Parse the inputs to decide which file to check, return the local path to it.
         """
         # If URL provided, then use that
-        nc_url = get_input(inputs, "FileURL")
-        nc_file_upload = get_input(inputs, "FileUpload")
-        nc_file_path = get_input(inputs, "FilePath")
+        url = get_input(inputs, "FileURL")
+        file_upload = get_input(inputs, "FileUpload")
+        file_path = get_input(inputs, "FilePath")
 
-        if nc_url:
+        if url:
             # Use downloaded file
-            file_path = self._download_file(nc_url)
+            file_path = self._download_file(url)
 
-        elif nc_file_upload:
-            file_path = self._map_url_to_path(nc_file_upload)
+        elif file_upload:
+            file_path = self._map_url_to_path(file_upload)
 
-        elif nc_file_path:
-            file_path = nc_file_path
+        elif file_path:
+            file_path = file_path
 
         else:
             raise Exception()
@@ -137,17 +137,23 @@ class AMOFCompCheck(Process):
         LOGGER.info(f"Data file to check: {file_path}")
         return file_path
 
-    def _wrap_checker(self, checks_version, file_path):
+    def _wrap_checker(self, checks_version, input_path):
+        output_dir = self.workdir
+
         TEST_FILE = "/gws/smf/j04/cedaproc/amf-example-files/ncas-anemometer-1_ral_29001225_mean-winds_v0.1.nc"
         CHECKS_VERSION = "v2.0"
         PYESSV_ARCHIVE_HOME = "/gws/smf/j04/cedaproc/amof-checker/AMF_CVs-2.0.0/pyessv-vocabs"
         CHECKS_DIR = "/gws/smf/j04/cedaproc/amof-checker/amf-compliance-checks-2.0.0/checks"
 
         cmd = "source /gws/smf/j04/cedaproc/amof-checker/setup-checks-env.sh; "
-        cmd += f"amf-checker --yaml-dir {CHECKS_DIR} --version {CHECKS_VERSION} {TEST_FILE}"
+        cmd += f"amf-checker --yaml-dir {CHECKS_DIR} --version {CHECKS_VERSION} -f text -o {output_dir} {TEST_FILE}"
 
         sp.run(f'bash -c "{cmd}"', shell=True, env={"PYESSV_ARCHIVE_HOME": PYESSV_ARCHIVE_HOME, "CHECKS_DIR": CHECKS_DIR})
+        output_path = os.path.join(output_dir, os.path.basename(TEST_FILE) + ".cc-output")
 
+        new_path = os.path.join(output_dir, "check-output.txt")
+        os.rename(output_path, new_path)
+        return new_path 
 
     def _handler(self, request, response):
         """
@@ -163,7 +169,7 @@ class AMOFCompCheck(Process):
                                 "FileUpload or FilePath."))
 
         # Get the checks version to use
-        checks_version = "v" + get_input("AMOFChecksVersion").replace("auto", self.supported_checks_versions[0])
+        checks_version = "v" + get_input(request.inputs, "AMOFChecksVersion").replace("auto", self.supported_checks_versions[0])
 
         # Set output file
         output_file = os.path.join(self.workdir, 'amof_checker_output.txt')
@@ -175,22 +181,22 @@ class AMOFCompCheck(Process):
             def write(self, data):
                 self.data += data
 
-        tmp_stdout = sys.stdout
-        sys.stdout = Stdout()
+#        tmp_stdout = sys.stdout
+#        sys.stdout = Stdout()
 
         try:
-            self._wrap_checker(checks_version, file_path)
+            output_file = self._wrap_checker(checks_version, file_path)
         except Exception:
             raise ProcessError('Could not run AMOF Compliance Checker on input file') 
 
-        output = sys.stdout.data
+#        output = sys.stdout.data
 
         # Put standard output back in the right place
-        sys.stdout = tmp_stdout
+#        sys.stdout = tmp_stdout
 
         # Write the results to the output file
-        with open(output_file, "w") as fout:
-            fout.write(output)
+#        with open(output_file, "w") as fout:
+#            fout.write(output)
 
         response.update_status('AMOF-Comp-Checks completed', 90)
 
