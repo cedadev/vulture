@@ -12,6 +12,14 @@ import os
 print("""NOTE: I had to hack the walrus operator in one line of fsspec, not supported in Py3.7:
   File "/usr/local/Miniconda3-py39_4.12.0-Linux-x86_64/envs/vulture/lib/python3.7/site-packages/fsspec/implementations/reference.py", line 797
     if x := self.dataframes[pref]["raw"][i]:
+
+NOTE: I also had to hack the following objects in this library:
+/usr/local/Miniconda3-py39_4.12.0-Linux-x86_64/envs/vulture/lib/python3.7/site-packages/pywps/inout/formats/__init__.py
+
+FORMATS
+_FORMATS
+
+- added "PDF" and "PNG" to these.
 """)
 
 # Define the cache as a dictionary
@@ -351,11 +359,8 @@ class HadUKStripesRenderer(HadUKStripesMaker):
             df = df.rename(columns={"colour": "colour_count"})
             df["colour"] = df.index
 
-#            df = pd.DataFrame(ldf[["colour"]].value_counts().sort_values().sort_index())
             df["colour_block"] = ""
             df = df.reset_index()
-#            df = df.rename(columns={"count": "colour_count"})
-            assert "colour_count" in df
             row_vars = ["colour", "colour_count"]
 
         df["colour_block"] = df["colour"].map(colour_dict)
@@ -371,7 +376,6 @@ class HadUKStripesRenderer(HadUKStripesMaker):
         table_rows = ""
 
         for idx, row in df.round(5).iterrows():
-            print(row.to_dict())
             html_row = row_template.format(**row)
             table_rows += html_row
 
@@ -435,7 +439,7 @@ class HadUKStripesRenderer(HadUKStripesMaker):
 def test_HadUKStripesMaker():
     stripes_maker = HadUKStripesRenderer()
 
-# RAL_LAT, RAL_LON = 51.570664384, -1.308832098
+    # RAL_LAT, RAL_LON = 51.570664384, -1.308832098
 
     df = stripes_maker.create(51.570664384, -1.308832098, output_file="/tmp/new-stripes2.png")
     html = stripes_maker.to_html(html_file="/tmp/output.html", project_name="My great project")
@@ -447,4 +451,3 @@ def test_HadUKStripesMaker():
     #stripes_maker.show_plot()
 
 
-test_HadUKStripesMaker()
