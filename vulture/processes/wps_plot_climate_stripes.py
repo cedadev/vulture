@@ -25,12 +25,28 @@ LOGGER = logging.getLogger("PYWPS")
 #FORMATS_EXT.extend( [Format('application/pdf', extension='.pdf')])
 
 
+_abstract = (
+"Plot your own climate stripes figure! Choose a start and end year and a location within "
+"the UK and we'll use this to make a personalised climate stripes image for your area. " 
+"""
+All we need is the latitude and longitude of your location, you can find this information at https://www.latlong.net . 
+""" 
+"The programme will take a little while to run after submission. Once it has completed click "
+"'Show Output' to view a pdf with your figure! The pdf has a table showing the breakdown of each "
+"year, the temperature for that year and the corresponding colour. It will also show you how many "
+"times each colour is used in the figure."
+"""
+You can find out more about climate stripes and discover inspiration for things to do with them here: 
+https://www.ceda.ac.uk/outreach 
+"""
+)
+
 
 class PlotClimateStripes(Process):
 
     IDENTIFIER = "PlotClimateStripes"
     TITLE = "Plot Climate Stripes"
-    ABSTRACT = "Plots Climate Stripes...ad more text"
+    ABSTRACT = _abstract #"Plots Climate Stripes...ad more text"
     KEYWORDS = ["climate", "observations", "change"]
     INPUTS_LIST = ["latitude", "longitude"]
     METALINK_ID = "plot-climate-stripes-result"
@@ -39,6 +55,8 @@ class PlotClimateStripes(Process):
         Metadata("CEDA WPS UI", "https://ceda-wps-ui.ceda.ac.uk"),
         Metadata("CEDA WPS", "https://ceda-wps.ceda.ac.uk"),
         Metadata("Disclaimer", "https://help.ceda.ac.uk/article/4642-disclaimer"),
+        Metadata("https://www.latlong.net", "https://www.latlong.net"),
+        Metadata("https://www.ceda.ac.uk/outreach", "https://www.ceda.ac.uk/outreach")
     ]
 
     def __init__(self):
@@ -74,12 +92,23 @@ class PlotClimateStripes(Process):
 
     def _define_inputs(self):
         inputs = [
-            self._define_input("latitude", "Latitude", "Some text about Lat", "float"),
-            self._define_input("longitude", "Longitude", "Some text about Lon", "float"),
-            self._define_input("n_colours", "Number of colours", "Some text about ncols", "integer", default=20),
-            self._define_input("project_name", "Project name", "A name for your project", "string", optional=True),
-            self._define_input("start_year", "Start year", "Info about start year", "integer", default=1901),
-            self._define_input("end_year", "End year", "Info about end year", "integer", default=2000)
+            self._define_input("project_name", "Project name", "Enter a name for your project", "string", optional=True),
+            self._define_input("latitude", "Latitude", 
+                               "Latitude is how far the location is from the equator, most of the UK is between 50 and 59 degrees North.",
+                               "float"),
+            self._define_input("longitude", "Longitude", 
+                               ("Longitude is how far the place is from the Prime Meridian which goes vertically through Greenwich in London. "
+                                "Anything East of this will be a positive number whilst anything West will be a negative number."), 
+                               "float"),
+            self._define_input("n_colours", "Number of Colours", 
+                               ("Enter the number of colours you’d like in your figure. The minimum is 5 and the maximum is 100, "
+                                "we recommend 20 colours."), "integer", default=20),
+            self._define_input("start_year", "Start year", 
+                               "Enter the year you would like the data to start from. Note: most of the data starts in 1901.", 
+                               "integer", default=1901),
+            self._define_input("end_year", "End year", 
+                               "Enter the year you would like the data to finish on. The last available year is 2022.", 
+                               "integer", default=2000)
             
 #        LiteralInput( "yearNumericRange", "Time Period", abstract="The time period", data_type="string", default="1901/2000", min_occurs=1, max_occurs=1,)
 
@@ -91,7 +120,11 @@ class PlotClimateStripes(Process):
             ComplexOutput('output', 'Output',
                           abstract='Output file',
                           as_reference=True,
-                          supported_formats=[FORMATS.PDF])]
+                          supported_formats=[FORMATS.PDF]),
+            ComplexOutput('png_output', 'PNG Output',
+                          as_reference=True,
+                          supported_formats=[FORMATS.PNG])
+            ]
         return outputs
 
 
@@ -128,7 +161,7 @@ class PlotClimateStripes(Process):
 
         LOGGER.info(f'Written output file: {pdf_file}')
         response.outputs['output'].file = pdf_file
-#        response.outputs['png_output'].file = png_file
+        response.outputs['png_output'].file = png_file
         return response
 
 

@@ -328,6 +328,7 @@ HTML_TEMPLATE = """<html>
     </br/>
     <img src="{png_file}" />
     <br/>
+     
     <h1>Table 1: Temperature variations from the average, and colours per year.</h1>
 
 {table_1}
@@ -336,8 +337,14 @@ HTML_TEMPLATE = """<html>
 
 {table_2}
 
+<h1>Citation</h1>
+
+<p>Met Office; Hollis, D.; McCarthy, M.; Kendon, M.; Legg, T. (2023): HadUK-Grid Gridded Climate Observations on a 60km grid over the UK, v1.2.0.ceda (1836-2022). NERC EDS Centre for Environmental Data Analysis, 30 August 2023. doi:10.5285/22df6602b5064b1686dda7e9455f86fc. <a href="https://dx.doi.org/10.5285/22df6602b5064b1686dda7e9455f86fc">https://dx.doi.org/10.5285/22df6602b5064b1686dda7e9455f86fc</a>.</p>
+
 <h1>Additional information</h1>
-<p>If you like this, then please do something nice...</p>
+<p>If you like this please share with friends and family! You can point them towards our page 
+https://www.ceda.ac.uk/outreach where there's some more resources, links to further information 
+and a place for you to share anything cool you do with this!</p>
 
 </body>
 </html>"""
@@ -405,6 +412,7 @@ class HadUKStripesRenderer(HadUKStripesMaker):
         content = self.latest_request.copy()
         content["project"] = project
         content["png_file"] = self.latest_plot
+        content["png_url"] = os.path.basename(self.latest_plot)
 
         content["table_1"] = self._get_table(table=1)
         content["table_2"] = self._get_table(table=2)
