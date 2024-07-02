@@ -12,7 +12,9 @@ import os
 print("""NOTE: I had to hack the walrus operator in one line of fsspec, not supported in Py3.7:
   File "/usr/local/Miniconda3-py39_4.12.0-Linux-x86_64/envs/vulture/lib/python3.7/site-packages/fsspec/implementations/reference.py", line 797
     if x := self.dataframes[pref]["raw"][i]:
+""")
 
+"""
 NOTE: I also had to hack the following objects in this library:
 /usr/local/Miniconda3-py39_4.12.0-Linux-x86_64/envs/vulture/lib/python3.7/site-packages/pywps/inout/formats/__init__.py
 
@@ -20,7 +22,7 @@ FORMATS
 _FORMATS
 
 - added "PDF" and "PNG" to these.
-""")
+"""
 
 # Define the cache as a dictionary
 CACHE = {}

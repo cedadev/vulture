@@ -1,5 +1,7 @@
 import os
 import shutil
+from collections import namedtuple
+
 from pywps import (
     BoundingBoxInput,
     LiteralInput,
@@ -8,11 +10,12 @@ from pywps import (
     Format,
     ComplexOutput,
 )
+from pywps.inout.formats import _FORMATS
 
 from pywps.app.Common import Metadata
 from pywps.app.exceptions import ProcessError
-from ..utils import get_input
 
+from vulture.utils import get_input
 from vulture.stripes_lib.stripes import HadUKStripesRenderer
 
 
@@ -21,8 +24,25 @@ LOGGER = logging.getLogger("PYWPS")
 
 
 # Extend FORMATS
-#FORMATS_EXT = FORMATS
-#FORMATS_EXT.extend( [Format('application/pdf', extension='.pdf')])
+def get_extended_pywps_FORMATS():
+    """
+    Returns a FORMATS object, with additional formats:
+    - PDF
+    - PNG
+    """
+    new_formats = [
+        ("PDF", Format('application/pdf', extension='.pdf')),
+        ("PNG", Format('image/png', extension='.png'))]
+
+    FORMATS_EXT = namedtuple('FORMATS_EXT', _FORMATS._fields + \
+                             tuple(fmt[0] for fmt in new_formats))
+    all_formats = [fmt_spec for _, fmt_spec in FORMATS._asdict().items()] + \
+                  [fmt[1] for fmt in new_formats]
+
+    return FORMATS_EXT(*all_formats)
+
+
+FORMATS_EXT = get_extended_pywps_FORMATS()
 
 
 _abstract = (
@@ -120,10 +140,10 @@ class PlotClimateStripes(Process):
             ComplexOutput('output', 'Output',
                           abstract='Output file',
                           as_reference=True,
-                          supported_formats=[FORMATS.PDF]),
+                          supported_formats=[FORMATS_EXT.PDF]),
             ComplexOutput('png_output', 'PNG Output',
                           as_reference=True,
-                          supported_formats=[FORMATS.PNG])
+                          supported_formats=[FORMATS_EXT.PNG])
             ]
         return outputs
 
