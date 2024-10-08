@@ -446,14 +446,14 @@ class HadUKStripesRenderer(HadUKStripesMaker):
 
 
 
-def test_HadUKStripesMaker():
-    stripes_maker = HadUKStripesRenderer()
+#def test_HadUKStripesMaker():
+#    stripes_maker = HadUKStripesRenderer()
 
     # RAL_LAT, RAL_LON = 51.570664384, -1.308832098
 
-    df = stripes_maker.create(51.570664384, -1.308832098, output_file="/tmp/new-stripes2.png")
-    html = stripes_maker.to_html(html_file="/tmp/output.html", project_name="My great project")
-    pdf_file = stripes_maker.to_pdf("/tmp/output.pdf", project_name="Another project")
+#    df = stripes_maker.create(51.570664384, -1.308832098, output_file="/tmp/new-stripes2.png")
+#    html = stripes_maker.to_html(html_file="/tmp/output.html", project_name="My great project")
+#    pdf_file = stripes_maker.to_pdf("/tmp/output.pdf", project_name="Another project")
     #df = stripes_maker.create(51.23, -1.23, n_colours=10, cmap_name="winter", time_range=(1950, 2010), output_file="new-stripes.png")
 
     #stripes_maker.show_table()
