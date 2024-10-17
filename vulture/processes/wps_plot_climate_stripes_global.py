@@ -16,7 +16,7 @@ from pywps.app.Common import Metadata
 from pywps.app.exceptions import ProcessError
 
 from vulture.utils import get_input
-from vulture.stripes_lib.stripes import HadUKStripesRenderer
+from vulture.stripes_lib.stripes_old import HadUKStripesRenderer
 
 
 import logging
@@ -62,7 +62,7 @@ https://www.ceda.ac.uk/outreach
 )
 
 
-class PlotClimateStripes(Process):
+class PlotClimateStripesGlobal(Process):
 
     IDENTIFIER = "PlotClimateStripesGlobal"
     TITLE = "Plot Climate Stripes Global"
@@ -84,7 +84,7 @@ class PlotClimateStripes(Process):
         inputs = self._define_inputs()
         outputs = self._define_outputs()
 
-        super(PlotClimateStripes, self).__init__(
+        super(PlotClimateStripesGlobal, self).__init__(
             self._handler,
             identifier=self.IDENTIFIER,
             title=self.TITLE,
