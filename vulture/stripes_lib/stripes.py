@@ -185,7 +185,7 @@ class HadUKStripesMaker:
                                  lat=lat).sel(time=slice(start_year, end_year))
     
         # Get mean over reference period
-        print("calculate the mean over the reference period...")
+        print("calculate the mean over the reference period...fasdfsff")
         reference_mean = temp_series.sel(time=slice(str(ref_period[0]), str(ref_period[1]))).mean()
     
         # Construct content to return

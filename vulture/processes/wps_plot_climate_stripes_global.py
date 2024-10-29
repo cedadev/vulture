@@ -16,7 +16,7 @@ from pywps.app.Common import Metadata
 from pywps.app.exceptions import ProcessError
 
 from vulture.utils import get_input
-from vulture.stripes_lib.stripes_old import HadUKStripesRenderer
+from vulture.stripes_lib.stripes import HadUKStripesRenderer
 
 
 import logging
