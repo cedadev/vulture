@@ -158,6 +158,13 @@ class HadUKStripesMaker:
      
 
         ds = xr.open_dataset(self.netcdf_path, use_cftime=True, decode_timedelta=False)
+        print("#\n" * 5)
+        print("DS from netCDF:")
+        print(ds) 
+        print("#\n" * 5)
+        ds = ds.resample(time='Y').mean()
+
+     
         print("extract nearest grid point (with time subset if specified)...")
         start_year, end_year = (str(years[0]), str(years[1])) if years \
                                 else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
