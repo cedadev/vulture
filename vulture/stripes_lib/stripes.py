@@ -155,43 +155,26 @@ class HadUKStripesMaker:
             - lat: actual latitude of grid box centre
             - lon: actual longitude of grid box centre
         """
-        # Create a mapper to load the data from Kerchunk
-        compression = "zstd" if self.kerchunk_path.split(".")[-1].startswith("zst") else None
-        mapper = fsspec.get_mapper("reference://", fo=self.kerchunk_path, target_options={"compression": compression})
-
-        # Create an Xarray dataset that will read from the NetCDF data files
-        print("opening kerchunk...need bigger arrays and specify duplicate coords and lat lon from each")
-        ds = xr.open_zarr(mapper, consolidated=False, use_cftime=True, decode_timedelta=False)
-        
-        print("#\n" * 5)
-        print("DS from kerchunk:")
-        print(ds) 
-
-
-        ds = xr.open_dataset(self.netcdf_path, use_cftime=True, decode_timedelta=False)
-        print("#\n" * 5)
-        print("DS from netCDF:")
-        print(ds) 
-        print("#\n" * 5)
-
      
+
+        
         print("extract nearest grid point (with time subset if specified)...")
         start_year, end_year = (str(years[0]), str(years[1])) if years \
                                 else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
 
         lon, lat = self._get_closest_points(lon, lat, ds)
 
+
+
         temp_series = ds.tmp.sel(lon=lon, 
                                  lat=lat).sel(time=slice(start_year, end_year))
-    
         # Get mean over reference period
         print("calculate the mean over the reference period...")
         reference_mean = temp_series.sel(time=slice(str(ref_period[0]), str(ref_period[1]))).mean()
-    
         # Construct content to return
         response = {
-            "temp_series": temp_series.squeeze().compute(),
-            "demeaned_temp_series": (temp_series - reference_mean).squeeze().compute(),
+            "temp_series": temp_series.squeeze().compute().astype('float64'),
+            "demeaned_temp_series": (temp_series - reference_mean).squeeze().compute().astype('float64'),
             "lat": lat,
             "lon": lon
         }
