@@ -173,6 +173,7 @@ class HadUKStripesMaker:
         print("DS from netCDF:")
         print(ds) 
         print("#\n" * 5)
+        ds = ds.resample(time='Y').mean()
 
      
         print("extract nearest grid point (with time subset if specified)...")
@@ -183,11 +184,9 @@ class HadUKStripesMaker:
 
         temp_series = ds.tmp.sel(lon=lon, 
                                  lat=lat).sel(time=slice(start_year, end_year))
-    
         # Get mean over reference period
-        print("calculate the mean over the reference period...fasdfsff")
+        print("calculate the mean over the reference period...")
         reference_mean = temp_series.sel(time=slice(str(ref_period[0]), str(ref_period[1]))).mean()
-    
         # Construct content to return
         response = {
             "temp_series": temp_series.squeeze().compute(),
