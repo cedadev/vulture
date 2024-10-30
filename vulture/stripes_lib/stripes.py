@@ -156,12 +156,10 @@ class HadUKStripesMaker:
             - lon: actual longitude of grid box centre
         """
      
-
+        print("Opening dataset...")
         ds = xr.open_dataset(self.netcdf_path, use_cftime=True, decode_timedelta=False)
-        print("#\n" * 5)
-        print("DS from netCDF:")
-        print(ds) 
-        print("#\n" * 5)
+
+        print("Resampling dataset...")
         ds = ds.resample(time='Y').mean()
 
      
@@ -169,15 +167,16 @@ class HadUKStripesMaker:
         start_year, end_year = (str(years[0]), str(years[1])) if years \
                                 else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
 
+
+        print("Getting the closest points...")
         lon, lat = self._get_closest_points(lon, lat, ds)
-
-
-
         temp_series = ds.tmp.sel(lon=lon, 
                                  lat=lat).sel(time=slice(start_year, end_year))
+
         # Get mean over reference period
         print("calculate the mean over the reference period...")
         reference_mean = temp_series.sel(time=slice(str(ref_period[0]), str(ref_period[1]))).mean()
+        
         # Construct content to return
         response = {
             "temp_series": temp_series.squeeze().compute().astype('float64'),
@@ -185,9 +184,6 @@ class HadUKStripesMaker:
             "lat": lat,
             "lon": lon
         }
-        print("Response from NET CDF")
-        print(response)
-        print("Returning data objects...")
         return response
 
     def create(self, lat, lon, n_colours=N_COLOURS, cmap_name=DEFAULT_CMAP, time_range=None, 
