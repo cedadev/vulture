@@ -73,6 +73,9 @@ NETCDF_PATH = "/badc/cru/data/cru_ts/cru_ts_4.08/data/tmp/cru_ts4.08.1901.2023.t
 KERCHUNK_PATH = "/usr/local/src/vulture/vulture/stripes_lib/haduk-grid1.json"
 SPATIAL_PROXIMITY_THRESHOLD = 0.05
 DEFAULT_REFERENCE_PERIOD = (1901, 2000)
+DEFAULT_MODE = False
+CITATIONS = ['Met Office; Hollis, D.; McCarthy, M.; Kendon, M.; Legg, T. (2023): HadUK-Grid Gridded Climate Observations on a 60km grid over the UK, v1.2.0.ceda (1836-2022). NERC EDS Centre for Environmental Data Analysis, 30 August 2023. doi:10.5285/22df6602b5064b1686dda7e9455f86fc. <a href="https://dx.doi.org/10.5285/22df6602b5064b1686dda7e9455f86fc">https://dx.doi.org/10.5285/22df6602b5064b1686dda7e9455f86fc</a>.',
+             'University of East Anglia Climatic Research Unit; Harris, I.C.; Jones, P.D.; Osborn, T. (2024): CRU TS4.08: Climatic Research Unit (CRU) Time-Series (TS) version 4.08 of high-resolution gridded data of month-by-month variation in climate (Jan. 1901- Dec. 2023). NERC EDS Centre for Environmental Data Analysis, date of citation. <a href="https://catalogue.ceda.ac.uk/uuid/715abce1604a42f396f81db83aeb2a4b/">https://catalogue.ceda.ac.uk/uuid/715abce1604a42f396f81db83aeb2a4b/</a>.']
 
 
 class HadUKStripesMaker:
@@ -97,7 +100,7 @@ class HadUKStripesMaker:
                output_file="new-stripes.png")
     """
 
-    def __init__(self, kerchunk_path=KERCHUNK_PATH, 
+    def __init__(self, global_mode=DEFAULT_MODE, kerchunk_path=KERCHUNK_PATH, 
                 netcdf_path=NETCDF_PATH,
                 spatial_threshold=SPATIAL_PROXIMITY_THRESHOLD,
                 reference_period=DEFAULT_REFERENCE_PERIOD,
@@ -110,6 +113,7 @@ class HadUKStripesMaker:
         self.reference_period = reference_period
         self.cmap_name = cmap_name
         self.n_colours = n_colours
+        self.global_mode = global_mode
 
         self.latest_df = None
         self.latest_plot = None
@@ -124,25 +128,17 @@ class HadUKStripesMaker:
     
         Returns tuple of: (eastings, northings)
         """
-        y = float(point_ds.lon.values)
-        x = float(point_ds.lat.values)
+        y = float(point_ds.projection_y_coordinate.values)
+        x = float(point_ds.projection_x_coordinate.values)
         
-        lat_diff = abs(float(ds.lat.sel(lon=y, lat=x)) - lat)
-        lon_diff = abs(float(ds.lon.sel(lon=y, lat=x)) - lon)
+        lat_diff = abs(float(ds.latitude.sel(projection_y_coordinate=y, projection_x_coordinate=x)) - lat)
+        lon_diff = abs(float(ds.longitude.sel(projection_y_coordinate=y, projection_x_coordinate=x)) - lon)
     
         assert lat_diff < self.spatial_threshold, f"Lat diff is too big: {lat_diff}"
         assert lon_diff < self.spatial_threshold, f"Lon diff is too big: {lon_diff}"
     
         return (x, y)
-    
-    def _get_closest_points(self, lon, lat, ds):
-        
 
-        lon = min(ds.tmp.lon.values, key = lambda x: abs(lon - x))
-        lat = min(ds.tmp.lat.values, key = lambda x: abs(lat - x))
-
-        return lon, lat
-        
 
     def _extract_time_series_at_location(self, lat, lon, years=None, ref_period=DEFAULT_REFERENCE_PERIOD):
         """
@@ -155,35 +151,65 @@ class HadUKStripesMaker:
             - lat: actual latitude of grid box centre
             - lon: actual longitude of grid box centre
         """
-     
-        print("Opening dataset...")
-        ds = xr.open_dataset(self.netcdf_path, use_cftime=True, decode_timedelta=False)
 
-        print("Resampling dataset...")
-        ds = ds.resample(time='Y').mean()
-
-     
         print("extract nearest grid point (with time subset if specified)...")
         start_year, end_year = (str(years[0]), str(years[1])) if years \
                                 else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
 
+        response = dict()
 
-        print("Getting the closest points...")
-        lon, lat = self._get_closest_points(lon, lat, ds)
-        temp_series = ds.tmp.sel(lon=lon, 
-                                 lat=lat).sel(time=slice(start_year, end_year))
+        if not self.global_mode:
+            print("#\n" * 10)
+            print("Using UK dataset for process")
+            print("#\n" * 10)
+            # Create a mapper to load the data from Kerchunk
+            compression = "zstd" if self.kerchunk_path.split(".")[-1].startswith("zst") else None
+            mapper = fsspec.get_mapper("reference://", fo=self.kerchunk_path, target_options={"compression": compression})
 
+            # Create an Xarray dataset that will read from the NetCDF data files
+            print("opening kerchunk...need bigger arrays and specify duplicate coords and lat lon from each")
+            ds = xr.open_zarr(mapper, consolidated=False, use_cftime=True, decode_timedelta=False)
+
+            print("convert to northings, eastings...")
+            requested_eastings, requested_northings = [i[0] for i in convert_bng(lon, lat)] 
+
+            temp_series = ds.tas.sel(projection_y_coordinate=requested_northings, 
+                                 projection_x_coordinate=requested_eastings,
+                                 method="nearest").sel(time=slice(start_year, end_year))
+    
+            # Check the chosen location is near the requested location
+            print("check data point is close enough to the requested location (within spatial threshold)...")
+            actual_eastings, actual_northings = self._check_location_is_near(lat, lon, temp_series, ds)
+
+            response['eastings'] = actual_eastings
+            response['northings'] = actual_northings
+            response['lat'] = float(ds.latitude.sel(projection_y_coordinate=actual_northings, projection_x_coordinate=actual_eastings))
+            response['lon'] = float(ds.longitude.sel(projection_y_coordinate=actual_northings, projection_x_coordinate=actual_eastings))
+            
+
+        else:
+            print("Opening dataset...")
+            ds = xr.open_dataset(self.netcdf_path, use_cftime=True, decode_timedelta=False)
+
+            print("Resampling dataset...")
+            ds = ds.resample(time='Y').mean()
+
+            print("Getting the closest points...")
+            temp_series = ds.tmp.sel(lon=lon, 
+                                 lat=lat, method='nearest').sel(time=slice(start_year, end_year))
+
+            response['lat'] = lat
+            response['lon'] = lon
+        
         # Get mean over reference period
         print("calculate the mean over the reference period...")
         reference_mean = temp_series.sel(time=slice(str(ref_period[0]), str(ref_period[1]))).mean()
-        
-        # Construct content to return
-        response = {
-            "temp_series": temp_series.squeeze().compute().astype('float64'),
-            "demeaned_temp_series": (temp_series - reference_mean).squeeze().compute().astype('float64'),
-            "lat": lat,
-            "lon": lon
-        }
+
+        response['temp_series'] = temp_series.squeeze().compute().astype('float64')
+        response['demeaned_temp_series'] = (temp_series - reference_mean).squeeze().compute().astype('float64')
+
+        print("Returning data objects...")
+
         return response
 
     def create(self, lat, lon, n_colours=N_COLOURS, cmap_name=DEFAULT_CMAP, time_range=None, 
@@ -347,7 +373,7 @@ HTML_TEMPLATE = """<html>
 
 <h1>Citation</h1>
 
-<p>Met Office; Hollis, D.; McCarthy, M.; Kendon, M.; Legg, T. (2023): HadUK-Grid Gridded Climate Observations on a 60km grid over the UK, v1.2.0.ceda (1836-2022). NERC EDS Centre for Environmental Data Analysis, 30 August 2023. doi:10.5285/22df6602b5064b1686dda7e9455f86fc. <a href="https://dx.doi.org/10.5285/22df6602b5064b1686dda7e9455f86fc">https://dx.doi.org/10.5285/22df6602b5064b1686dda7e9455f86fc</a>.</p>
+<p>{citation}</p>
 
 <h1>Additional information</h1>
 <p>If you like this please share with friends and family! You can point them towards our page 
@@ -424,6 +450,9 @@ class HadUKStripesRenderer(HadUKStripesMaker):
 
         content["table_1"] = self._get_table(table=1)
         content["table_2"] = self._get_table(table=2)
+
+        content["citation"] = CITATIONS[1] if self.global_mode else CITATIONS[0]
+
         
         html = HTML_TEMPLATE.format(**content)
 
