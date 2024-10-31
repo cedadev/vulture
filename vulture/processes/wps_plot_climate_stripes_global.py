@@ -46,8 +46,8 @@ FORMATS_EXT = get_extended_pywps_FORMATS()
 
 
 _abstract = (
-"Plot your own climate stripes figure! Choose a start and end year and a location within "
-"the UK and we'll use this to make a personalised climate stripes image for your area. " 
+"Plot your own climate stripes figure! Choose a start and end year and a location"
+" and we'll use this to make a personalised climate stripes image for your area. " 
 """
 All we need is the latitude and longitude of your location, you can find this information at https://www.latlong.net . 
 """ 
@@ -114,10 +114,10 @@ class PlotClimateStripesGlobal(Process):
         inputs = [
             self._define_input("project_name", "Project name", "Enter a name for your project", "string", optional=True),
             self._define_input("latitude", "Latitude", 
-                               "Latitude is how far the location is from the equator, most of the UK is between 50 and 59 degrees North.",
+                               "Latitude is how far the location is from the equator.",
                                "float"),
             self._define_input("longitude", "Longitude", 
-                               ("Longitude is how far the place is from the Prime Meridian which goes vertically through Greenwich in London. "
+                               ("Longitude is how far the place is from the Prime Meridian."
                                 "Anything East of this will be a positive number whilst anything West will be a negative number."), 
                                "float"),
             self._define_input("n_colours", "Number of Colours", 
