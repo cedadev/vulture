@@ -78,7 +78,7 @@ CITATIONS = ['Met Office; Hollis, D.; McCarthy, M.; Kendon, M.; Legg, T. (2023):
              'University of East Anglia Climatic Research Unit; Harris, I.C.; Jones, P.D.; Osborn, T. (2024): CRU TS4.08: Climatic Research Unit (CRU) Time-Series (TS) version 4.08 of high-resolution gridded data of month-by-month variation in climate (Jan. 1901- Dec. 2023). NERC EDS Centre for Environmental Data Analysis, date of citation. <a href="https://catalogue.ceda.ac.uk/uuid/715abce1604a42f396f81db83aeb2a4b/">https://catalogue.ceda.ac.uk/uuid/715abce1604a42f396f81db83aeb2a4b/</a>.']
 
 
-class HadUKStripesMaker:
+class StripesMaker:
     """
     A class to create climate stripes for different locations.
     You can tweak:
@@ -90,7 +90,7 @@ class HadUKStripesMaker:
        - the spatial threshold used for checking a grid box centre is near the requested location
 
     Use as follows:
-    >>> stripes_maker = HadUKStripesMaker()
+    >>> stripes_maker = StripesMaker()
     >>> df = stripes_maker.create(51.23, -1.23, )
     >>> stripes_maker.show_plot()
     >>> strips_maker.show_table()
@@ -386,7 +386,7 @@ and a place for you to share anything cool you do with this!</p>
 
 # Create an extension to write to HTML and PDF outputs
 
-class HadUKStripesRenderer(HadUKStripesMaker):
+class StripesRenderer(StripesMaker):
     
     def _get_table(self, table):
         ldf = self.latest_df
@@ -481,8 +481,8 @@ class HadUKStripesRenderer(HadUKStripesMaker):
 
 
 
-#def test_HadUKStripesMaker():
-#    stripes_maker = HadUKStripesRenderer()
+#def test_StripesMaker():
+#    stripes_maker = StripesRenderer()
 
     # RAL_LAT, RAL_LON = 51.570664384, -1.308832098
 

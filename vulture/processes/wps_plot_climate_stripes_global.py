@@ -16,7 +16,7 @@ from pywps.app.Common import Metadata
 from pywps.app.exceptions import ProcessError
 
 from vulture.utils import get_input
-from vulture.stripes_lib.stripes import HadUKStripesRenderer
+from vulture.stripes_lib.stripes import StripesRenderer
 
 
 import logging
@@ -166,7 +166,7 @@ class PlotClimateStripesGlobal(Process):
 #        shutil.copy("/tmp/climate-stripes.png", output_file)
 
         # Make the stripes
-        stripes_maker = HadUKStripesRenderer(global_mode=True)
+        stripes_maker = StripesRenderer(global_mode=True)
         response.update_status('Begin data loading', 10)
 
 #        RAL = [51.570664384, -1.308832098]
