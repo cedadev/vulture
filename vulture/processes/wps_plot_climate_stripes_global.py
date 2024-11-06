@@ -128,7 +128,7 @@ class PlotClimateStripesGlobal(Process):
                                "integer", default=1901),
             self._define_input("end_year", "End year", 
                                "Enter the year you would like the data to finish on. The last available year is 2023.", 
-                               "integer", default=2000)
+                               "integer", default=2023)
             
 #        LiteralInput( "yearNumericRange", "Time Period", abstract="The time period", data_type="string", default="1901/2000", min_occurs=1, max_occurs=1,)
 
