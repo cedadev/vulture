@@ -153,8 +153,8 @@ class StripesMaker:
         """
 
         print("extract nearest grid point (with time subset if specified)...")
-        start_year, end_year = (str(years[0]), str(years[1])) if years \
-                                else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
+        #start_year, end_year = (str(years[0]), str(years[1])) if years \
+        #                        else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
 
         response = dict()
 
@@ -169,6 +169,8 @@ class StripesMaker:
             # Create an Xarray dataset that will read from the NetCDF data files
             print("opening kerchunk...need bigger arrays and specify duplicate coords and lat lon from each")
             ds = xr.open_zarr(mapper, consolidated=False, use_cftime=True, decode_timedelta=False)
+            start_year, end_year = (str(years[0]), str(years[1])) if years \
+                                else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
 
             print("convert to northings, eastings...")
             requested_eastings, requested_northings = [i[0] for i in convert_bng(lon, lat)] 
@@ -190,6 +192,8 @@ class StripesMaker:
         else:
             print("Opening dataset...")
             ds = xr.open_dataset(self.netcdf_path, use_cftime=True, decode_timedelta=False)
+            start_year, end_year = (str(years[0]), str(years[1])) if years \
+                                else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
 
             print("Resampling dataset...")
             ds = ds.resample(time='Y').mean()
