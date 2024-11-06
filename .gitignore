@@ -130,3 +130,7 @@ dmypy.json
 
 # Vulture files
 *vulture.log
+.custom.cfg
+pywps-logs.sqlite
+pywps.pid
+
