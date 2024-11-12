@@ -159,9 +159,6 @@ class StripesMaker:
         response = dict()
 
         if not self.global_mode:
-            print("#\n" * 10)
-            print("Using UK dataset for process")
-            print("#\n" * 10)
             # Create a mapper to load the data from Kerchunk
             compression = "zstd" if self.kerchunk_path.split(".")[-1].startswith("zst") else None
             mapper = fsspec.get_mapper("reference://", fo=self.kerchunk_path, target_options={"compression": compression})
@@ -199,8 +196,9 @@ class StripesMaker:
             ds = ds.resample(time='Y').mean()
 
             print("Getting the closest points...")
-            temp_series = ds.tmp.sel(lon=lon, 
-                                 lat=lat, method='nearest').sel(time=slice(start_year, end_year))
+            temp_series = ds.tmp.sel(lon=slice(*lon), lat=slice(*lat), time=slice(start_year, end_year))
+            temp_series = temp_series.where(~xr.ufuncs.isnan(temp_series))
+            temp_series = temp_series.mean(dim=["lat", "lon"])
 
             response['lat'] = lat
             response['lon'] = lon
@@ -211,6 +209,8 @@ class StripesMaker:
 
         response['temp_series'] = temp_series.squeeze().compute().astype('float64')
         response['demeaned_temp_series'] = (temp_series - reference_mean).squeeze().compute().astype('float64')
+
+        print(response)
 
         print("Returning data objects...")
 
@@ -265,7 +265,8 @@ class StripesMaker:
         print("Starting plot")
     
         colours = []
-        
+        print("#\n" * 5)
+        print(stripes_data.shape)
         for i in range(stripes_data.shape[0]):
             actual_value = actual_values[i]
             year = years[i]

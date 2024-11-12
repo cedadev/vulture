@@ -128,7 +128,8 @@ class PlotClimateStripesGlobal(Process):
                                "integer", default=1901),
             self._define_input("end_year", "End year", 
                                "Enter the year you would like the data to finish on. The last available year is 2023.", 
-                               "integer", default=2023)
+                               "integer", default=2023),
+            BoundingBoxInput("geo_extent", "Geographic extent", "Draw a rectangle to specify the location.")
             
 #        LiteralInput( "yearNumericRange", "Time Period", abstract="The time period", data_type="string", default="1901/2000", min_occurs=1, max_occurs=1,)
 
@@ -156,6 +157,7 @@ class PlotClimateStripesGlobal(Process):
         n_colours = get_input(request.inputs, "n_colours")
         start_year = get_input(request.inputs, "start_year")
         end_year = get_input(request.inputs, "end_year")
+        geo_box = get_input(request.inputs, "geo_extent")
     #    time_range = get_input(request.inputs, "yearNumericRange") 
    #     inputs = {"latitude": lat, "longitude": lon, "project_name": project_name}
    #     except Exception as exc:
@@ -170,6 +172,11 @@ class PlotClimateStripesGlobal(Process):
         response.update_status('Begin data loading', 10)
 
 #        RAL = [51.570664384, -1.308832098]
+        print("#\n" * 10)
+        print(geo_box)
+        lat = (geo_box[0], geo_box[2])
+        lon = (geo_box[1], geo_box[3])
+
         df = stripes_maker.create(lat, lon, n_colours=n_colours, output_file=png_file, time_range=(start_year, end_year))
 
         response.update_status('Data extracted', 70)
