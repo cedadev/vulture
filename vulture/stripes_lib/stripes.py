@@ -202,6 +202,11 @@ class StripesMaker:
             temp_series = ds.tmp.sel(lon=lon, 
                                  lat=lat, method='nearest').sel(time=slice(start_year, end_year))
 
+            print(temp_series)
+            contains_nan = temp_series.isnull().any()
+
+            print(contains_nan)
+
             response['lat'] = lat
             response['lon'] = lon
         

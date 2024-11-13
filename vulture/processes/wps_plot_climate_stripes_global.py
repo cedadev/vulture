@@ -174,14 +174,21 @@ class PlotClimateStripesGlobal(Process):
 
         response.update_status('Data extracted', 70)
 
+        is_empty = df['temp_value'].isna()
+        
+
 #        html = stripes_maker.to_html(html_file="/tmp/output.html", project_name="My great project")
         pdf_file_ = stripes_maker.to_pdf(pdf_file, project_name=project_name)
-                
-        response.update_status('Outputs written', 90)
 
-        LOGGER.info(f'Written output file: {pdf_file}')
-        response.outputs['output'].file = pdf_file
-        response.outputs['png_output'].file = png_file
+        if not is_empty:
+            response.update_status('Outputs written', 90)
+
+            LOGGER.info(f'Written output file: {pdf_file}')
+            response.outputs['output'].file = pdf_file
+            response.outputs['png_output'].file = png_file
+
+        if is_empty:
+            response.update_status('Choosen latitude and longitude returned empty data. Please, check if your point lays on the land.')
         return response
 
 
