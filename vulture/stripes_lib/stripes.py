@@ -159,9 +159,6 @@ class StripesMaker:
         response = dict()
 
         if not self.global_mode:
-            print("#\n" * 10)
-            print("Using UK dataset for process")
-            print("#\n" * 10)
             # Create a mapper to load the data from Kerchunk
             compression = "zstd" if self.kerchunk_path.split(".")[-1].startswith("zst") else None
             mapper = fsspec.get_mapper("reference://", fo=self.kerchunk_path, target_options={"compression": compression})
@@ -204,8 +201,6 @@ class StripesMaker:
 
             print(temp_series)
             contains_nan = temp_series.isnull().any()
-
-            print(contains_nan)
 
             response['lat'] = lat
             response['lon'] = lon
