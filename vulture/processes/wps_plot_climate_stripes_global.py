@@ -113,13 +113,6 @@ class PlotClimateStripesGlobal(Process):
     def _define_inputs(self):
         inputs = [
             self._define_input("project_name", "Project name", "Enter a name for your project", "string", optional=True),
-            self._define_input("latitude", "Latitude", 
-                               "Latitude is how far the location is from the equator.",
-                               "float"),
-            self._define_input("longitude", "Longitude", 
-                               ("Longitude is how far the place is from the Prime Meridian."
-                                "Anything East of this will be a positive number whilst anything West will be a negative number."), 
-                               "float"),
             self._define_input("n_colours", "Number of Colours", 
                                ("Enter the number of colours you’d like in your figure. The minimum is 5 and the maximum is 100, "
                                 "we recommend 20 colours."), "integer", default=20),
@@ -151,8 +144,6 @@ class PlotClimateStripesGlobal(Process):
 
     def _handler(self, request, response):
 
-        lat = get_input(request.inputs, "latitude")
-        lon = get_input(request.inputs, "longitude")
         project_name = get_input(request.inputs, "project_name")
         n_colours = get_input(request.inputs, "n_colours")
         start_year = get_input(request.inputs, "start_year")
