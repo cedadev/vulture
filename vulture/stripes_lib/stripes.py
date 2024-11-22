@@ -199,8 +199,11 @@ class StripesMaker:
             temp_series = ds.tmp.sel(lon=lon, 
                                  lat=lat, method='nearest').sel(time=slice(start_year, end_year))
 
-            print(temp_series)
-            contains_nan = temp_series.isnull().any()
+
+            if temp_series.isnull().any():
+                temp_series = ds.tmp.sel(lon=slice(lon - 0.5, lon + 0.5), lat=slice(lat - 0.5, lat + 0.5), time=slice(start_year, end_year))
+                temp_series = temp_series.where(~xr.ufuncs.isnan(temp_series))
+                temp_series = temp_series.mean(dim=["lat", "lon"])
 
             response['lat'] = lat
             response['lon'] = lon
