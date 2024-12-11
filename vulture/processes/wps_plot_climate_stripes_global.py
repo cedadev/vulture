@@ -181,7 +181,7 @@ class PlotClimateStripesGlobal(Process):
         pdf_file_ = stripes_maker.to_pdf(pdf_file, project_name=project_name)
 
         if is_empty:
-            raise ProcessError("Choosen latitude and longitude returned empty data. Please, check if your point lays on the land.")
+            raise ProcessError("The chosen latitude and longitude returned no valid data. Please check that your selection included land points.")
 
 
         response.update_status('Outputs written', 90)
