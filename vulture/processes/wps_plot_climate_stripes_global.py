@@ -46,8 +46,8 @@ FORMATS_EXT = get_extended_pywps_FORMATS()
 
 
 _abstract = (
-"Plot your own climate stripes figure! Choose a start and end year and a location within "
-"the UK and we'll use this to make a personalised climate stripes image for your area. " 
+"Plot your own climate stripes figure! Choose a start and end year and a location"
+" and we'll use this to make a personalised climate stripes image for your area. " 
 """
 All we need is the latitude and longitude of your location, you can find this information at https://www.latlong.net . 
 """ 
@@ -62,10 +62,10 @@ https://www.ceda.ac.uk/outreach
 )
 
 
-class PlotClimateStripes(Process):
+class PlotClimateStripesGlobal(Process):
 
-    IDENTIFIER = "PlotClimateStripes"
-    TITLE = "Plot Climate Stripes"
+    IDENTIFIER = "PlotClimateStripesGlobal"
+    TITLE = "Plot Climate Stripes Global"
     ABSTRACT = _abstract #"Plots Climate Stripes...ad more text"
     KEYWORDS = ["climate", "observations", "change"]
     INPUTS_LIST = ["latitude", "longitude"]
@@ -84,7 +84,7 @@ class PlotClimateStripes(Process):
         inputs = self._define_inputs()
         outputs = self._define_outputs()
 
-        super(PlotClimateStripes, self).__init__(
+        super(PlotClimateStripesGlobal, self).__init__(
             self._handler,
             identifier=self.IDENTIFIER,
             title=self.TITLE,
@@ -114,10 +114,10 @@ class PlotClimateStripes(Process):
         inputs = [
             self._define_input("project_name", "Project name", "Enter a name for your project", "string", optional=True),
             self._define_input("latitude", "Latitude", 
-                               "Latitude is how far the location is from the equator, most of the UK is between 50 and 59 degrees North.",
+                               "Latitude is how far the location is from the equator.",
                                "float"),
             self._define_input("longitude", "Longitude", 
-                               ("Longitude is how far the place is from the Prime Meridian which goes vertically through Greenwich in London. "
+                               ("Longitude is how far the place is from the Prime Meridian."
                                 "Anything East of this will be a positive number whilst anything West will be a negative number."), 
                                "float"),
             self._define_input("n_colours", "Number of Colours", 
@@ -127,8 +127,8 @@ class PlotClimateStripes(Process):
                                "Enter the year you would like the data to start from. Note: most of the data starts in 1901.", 
                                "integer", default=1901),
             self._define_input("end_year", "End year", 
-                               "Enter the year you would like the data to finish on. The last available year is 2022.", 
-                               "integer", default=2000)
+                               "Enter the year you would like the data to finish on. The last available year is 2023.", 
+                               "integer", default=2023)
             
 #        LiteralInput( "yearNumericRange", "Time Period", abstract="The time period", data_type="string", default="1901/2000", min_occurs=1, max_occurs=1,)
 
@@ -166,7 +166,7 @@ class PlotClimateStripes(Process):
 #        shutil.copy("/tmp/climate-stripes.png", output_file)
 
         # Make the stripes
-        stripes_maker = StripesRenderer()
+        stripes_maker = StripesRenderer(global_mode=True)
         response.update_status('Begin data loading', 10)
 
 #        RAL = [51.570664384, -1.308832098]
@@ -174,14 +174,22 @@ class PlotClimateStripes(Process):
 
         response.update_status('Data extracted', 70)
 
+        is_empty = df['temp_value'].isna().any()
+        
+
 #        html = stripes_maker.to_html(html_file="/tmp/output.html", project_name="My great project")
         pdf_file_ = stripes_maker.to_pdf(pdf_file, project_name=project_name)
-                
+
+        if is_empty:
+            raise ProcessError("Choosen latitude and longitude returned empty data. Please, check if your point lays on the land.")
+
+
         response.update_status('Outputs written', 90)
 
         LOGGER.info(f'Written output file: {pdf_file}')
         response.outputs['output'].file = pdf_file
         response.outputs['png_output'].file = png_file
+
         return response
 
 

@@ -1,0 +1,3 @@
+            wps_outputurl="http://ceda-wps-staging.ceda.ac.uk/outputs",
+            wps_outputpath="/gws/nopw/j04/ceda_wps/birds/test/outputs/vulture"
+
