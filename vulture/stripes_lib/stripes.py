@@ -144,13 +144,11 @@ class StripesMaker:
         response = dict()
 
         if not self.global_mode:
-            # Create a mapper to load the data from Kerchunk
-            compression = "zstd" if self.kerchunk_path.split(".")[-1].startswith("zst") else None
-            mapper = fsspec.get_mapper("reference://", fo=self.kerchunk_path, target_options={"compression": compression})
-
             # Create an Xarray dataset that will read from the NetCDF data files
             print("opening kerchunk...need bigger arrays and specify duplicate coords and lat lon from each")
-            ds = xr.open_zarr(mapper, consolidated=False, use_cftime=True, decode_timedelta=False)
+            backend_args = {"consolidated": False, "storage_options": {"fo": self.kerchunk_path}}
+            ds = xr.open_dataset("reference://", engine="zarr", backend_kwargs=backend_args)
+
             start_year, end_year = (str(years[0]), str(years[1])) if years \
                                 else (str(ds.time.min().dt.year.values), str(ds.time.max().dt.year.values))
 
@@ -389,11 +387,8 @@ class StripesRenderer(StripesMaker):
             row_vars = "years temp_value temp_demeaned hex_colour red green blue colour".split()
         elif table == 2:
             df = pd.DataFrame(ldf["colour"].value_counts().sort_values().sort_index())
-            df = df.rename(columns={"colour": "colour_count"})
-            df["colour"] = df.index
-
+            df = df.reset_index().rename(columns={'count': 'colour_count'})
             df["colour_block"] = ""
-            df = df.reset_index()
             row_vars = ["colour", "colour_count"]
 
         df["colour_block"] = df["colour"].map(colour_dict)

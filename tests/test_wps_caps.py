@@ -11,5 +11,5 @@ def test_wps_caps():
         "/wps:Capabilities" "/wps:ProcessOfferings" "/wps:Process" "/ows:Identifier"
     )
     assert sorted(names.split()) == [
-        "CFCheck", "PlotClimateStripes",
+        'CFCheck', 'PlotClimateStripes', 'PlotClimateStripesGlobal'
     ]

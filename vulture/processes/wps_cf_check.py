@@ -134,7 +134,7 @@ class CFCheck(Process):
         else:
             raise Exception()
 
-        LOGGER.info(f"NetCDF file to cf-check: {nc_path}")
+        LOGGER.info(f"NetCDF file to check: {nc_path}")
         return nc_path
 
     def _handler(self, request, response):
@@ -192,4 +192,5 @@ class CFCheck(Process):
 
         response.outputs['output'].file = output_file
 
+        LOGGER.info("Completed job!!!")
         return response
