@@ -6,6 +6,7 @@
 ###########################################################
 
 import os
+import json
 import psutil
 import click
 from jinja2 import Environment, PackageLoader
@@ -103,6 +104,19 @@ def cli():
     For more documentation, visit http://pywps.org/doc
     """
     pass
+
+
+@cli.command()
+@click.argument('dumpfile')
+def print_dump(dumpfile):
+    with open(dumpfile) as f:
+        data = json.load(f)
+
+    req = json.loads(data["wps_request"])
+    content = {k: [vitem["data"] for vitem in v]
+               for k, v in req["inputs"].items()}
+    print(f"Contents of file '{dumpfile}':\n\n")
+    print(content)
 
 
 @cli.command()
